@@ -117,12 +117,13 @@ namespace SQLiteABC
 
         private void executeScalarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+ 
         }
 
         private void insertToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            Forms.Query.Insert f = new Forms.Query.Insert();
+            f.Show();
         }
 
         private void updateToolStripMenuItem_Click(object sender, EventArgs e)

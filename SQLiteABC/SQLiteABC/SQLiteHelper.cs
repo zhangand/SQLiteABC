@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Version 1.2
+// Date: 2014-03-27
+// http://sh.codeplex.com
+// Dedicated to Public Domain
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data;
@@ -14,6 +19,7 @@ namespace System.Data.SQLite
         Decimal,
         BLOB
     }
+
     public class SQLiteHelper
     {
         SQLiteCommand cmd = null;
@@ -346,8 +352,172 @@ namespace System.Data.SQLite
 
         #endregion
 
+        #region Utilities
 
+        public void CreateTable(SQLiteTable table)
+        {
+            StringBuilder sb = new Text.StringBuilder();
+            sb.Append("create table if not exists `");
+            sb.Append(table.TableName);
+            sb.AppendLine("`(");
+
+            bool firstRecord = true;
+
+            foreach (SQLiteColumn col in table.Columns)
+            {
+                if (col.ColumnName.Trim().Length == 0)
+                {
+                    throw new Exception("Column name cannot be blank.");
+                }
+
+                if (firstRecord)
+                    firstRecord = false;
+                else
+                    sb.AppendLine(",");
+
+                sb.Append(col.ColumnName);
+                sb.Append(" ");
+
+                if (col.AutoIncrement)
+                {
+
+                    sb.Append("integer primary key autoincrement");
+                    continue;
+                }
+
+                switch (col.ColDataType)
+                {
+                    case ColType.Text:
+                        sb.Append("text"); break;
+                    case ColType.Integer:
+                        sb.Append("integer"); break;
+                    case ColType.Decimal:
+                        sb.Append("decimal"); break;
+                    case ColType.DateTime:
+                        sb.Append("datetime"); break;
+                    case ColType.BLOB:
+                        sb.Append("blob"); break;
+                }
+
+                if (col.PrimaryKey)
+                    sb.Append(" primary key");
+                else if (col.NotNull)
+                    sb.Append(" not null");
+                else if (col.DefaultValue.Length > 0)
+                {
+                    sb.Append(" default ");
+
+                    if (col.DefaultValue.Contains(" ") || col.ColDataType == ColType.Text || col.ColDataType == ColType.DateTime)
+                    {
+                        sb.Append("'");
+                        sb.Append(col.DefaultValue);
+                        sb.Append("'");
+                    }
+                    else
+                    {
+                        sb.Append(col.DefaultValue);
+                    }
+                }
+            }
+
+            sb.AppendLine(");");
+
+            cmd.CommandText = sb.ToString();
+            cmd.ExecuteNonQuery();
+        }
+
+        public void RenameTable(string tableFrom, string tableTo)
+        {
+            cmd.CommandText = string.Format("alter table `{0}` rename to `{1}`;", tableFrom, tableTo);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void CopyAllData(string tableFrom, string tableTo)
+        {
+            DataTable dt1 = Select(string.Format("select * from `{0}` where 1 = 2;", tableFrom));
+            DataTable dt2 = Select(string.Format("select * from `{0}` where 1 = 2;", tableTo));
+
+            Dictionary<string, bool> dic = new Dictionary<string, bool>();
+
+            foreach (DataColumn dc in dt1.Columns)
+            {
+                if (dt2.Columns.Contains(dc.ColumnName))
+                {
+                    if (!dic.ContainsKey(dc.ColumnName))
+                    {
+                        dic[dc.ColumnName] = true;
+                    }
+                }
+            }
+
+            foreach (DataColumn dc in dt2.Columns)
+            {
+                if (dt1.Columns.Contains(dc.ColumnName))
+                {
+                    if (!dic.ContainsKey(dc.ColumnName))
+                    {
+                        dic[dc.ColumnName] = true;
+                    }
+                }
+            }
+
+            StringBuilder sb = new Text.StringBuilder();
+
+            foreach (KeyValuePair<string, bool> kv in dic)
+            {
+                if (sb.Length > 0)
+                    sb.Append(",");
+
+                sb.Append("`");
+                sb.Append(kv.Key);
+                sb.Append("`");
+            }
+
+            StringBuilder sb2 = new Text.StringBuilder();
+            sb2.Append("insert into `");
+            sb2.Append(tableTo);
+            sb2.Append("`(");
+            sb2.Append(sb.ToString());
+            sb2.Append(") select ");
+            sb2.Append(sb.ToString());
+            sb2.Append(" from `");
+            sb2.Append(tableFrom);
+            sb2.Append("`;");
+
+            cmd.CommandText = sb2.ToString();
+            cmd.ExecuteNonQuery();
+        }
+
+        public void DropTable(string table)
+        {
+            cmd.CommandText = string.Format("drop table if exists `{0}`", table);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void UpdateTableStructure(string targetTable, SQLiteTable newStructure)
+        {
+            newStructure.TableName = targetTable + "_temp";
+
+            CreateTable(newStructure);
+
+            CopyAllData(targetTable, newStructure.TableName);
+
+            DropTable(targetTable);
+
+            RenameTable(newStructure.TableName, targetTable);
+        }
+
+        public void AttachDatabase(string database, string alias)
+        {
+            Execute(string.Format("attach '{0}' as {1};", database, alias));
+        }
+
+        public void DetachDatabase(string alias)
+        {
+            Execute(string.Format("detach {0};", alias));
+        }
+
+        #endregion
 
     }
-
 }

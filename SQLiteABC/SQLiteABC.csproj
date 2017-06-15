@@ -70,6 +70,12 @@
     <Compile Include="Forms\DBInfo\GetTableStatus.Designer.cs">
       <DependentUpon>GetTableStatus.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Query\Insert.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Query\Insert.Designer.cs">
+      <DependentUpon>Insert.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Query\Select.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -78,7 +84,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SQLiteABC\SQLiteColumn.cs" />
+    <Compile Include="SQLiteABC\SQLiteColumnList.cs" />
     <Compile Include="SQLiteABC\SQLiteHelper.cs" />
+    <Compile Include="SQLiteABC\SQLiteTable.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -87,6 +96,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DBInfo\GetTableStatus.resx">
       <DependentUpon>GetTableStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Query\Insert.resx">
+      <DependentUpon>Insert.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Query\Select.resx">
       <DependentUpon>Select.cs</DependentUpon>
