@@ -106,7 +106,8 @@ namespace SQLiteABC
         //Query Memu Start
         private void selectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            Forms.Query.Select f = new Forms.Query.Select();
+            f.Show();
         }
 
         private void executeToolStripMenuItem_Click(object sender, EventArgs e)
