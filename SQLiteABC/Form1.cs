@@ -89,7 +89,8 @@ namespace SQLiteABC
 
         private void getTableListToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            Forms.DBInfo.GetTableList f = new Forms.DBInfo.GetTableList();
+            f.Show();
         }
 
         private void getColumnStatusToolStripMenuItem_Click(object sender, EventArgs e)
